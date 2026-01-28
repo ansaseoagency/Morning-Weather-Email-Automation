@@ -1,0 +1,161 @@
+{
+  "name": "Morning Weather Email Automation",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 5
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        0,
+        0
+      ],
+      "id": "c62c8034-3ca7-44ed-917e-9518828f3c25",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "cityName": "Bahawalpur, Pk"
+      },
+      "type": "n8n-nodes-base.openWeatherMap",
+      "typeVersion": 1,
+      "position": [
+        224,
+        0
+      ],
+      "id": "fa55be25-5f2f-4535-8757-acb331ce315b",
+      "name": "OpenWeatherMap",
+      "credentials": {
+        "openWeatherMapApi": {
+          "id": "ELIy3AsfJmpbsIqq",
+          "name": "Unnamed credential"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are a witty weather reporter. Based on the input data: Temp: {{ $json.main.temp }}°C, Conditions: {{ $json.weather[0].description }}, humidity: {{ $json.main.humidity }}%, write a high-energy email for me. Mention if I need an umbrella or extra coffee. Keep it brief and funny.",
+        "options": {
+          "systemMessage": "You are a helpful assistant.Write a fun weather report... Please format the output using HTML. Use <h3> for the headline, <br> for line breaks, and <strong> to highlight key weather stats like temperature and humidity."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        432,
+        0
+      ],
+      "id": "43cbdf96-a523-4d85-82d5-ab5d719660cf",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        368,
+        160
+      ],
+      "id": "34847ba6-0429-4c41-8b7c-84250a302594",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "R0sKGEEZRaTrb0Wz",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "ansaseoagency@gmail.com",
+        "subject": "=☀️ Morning Brief: {{ $now.format('MMMM Do') }}",
+        "message": "={{ $json.output }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        784,
+        0
+      ],
+      "id": "2b3099c8-d36e-44ec-b583-12f43dad4814",
+      "name": "Send a message",
+      "webhookId": "3dc9bc42-dbf1-4cff-a5b1-4fd18321019d",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "GCbQH0VuyZS8gKJd",
+          "name": "Gmail account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "OpenWeatherMap",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenWeatherMap": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "versionId": "d9e608b8-04f7-47b9-a9e2-acd152cee2b8",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "82366cd1eb0c5f278fbf073ddf0d2bf20404a71f1927e3acbe1b56104d28b6f6"
+  },
+  "id": "O_-NdfGUy5_TkOk6q8QDp",
+  "tags": []
+}
